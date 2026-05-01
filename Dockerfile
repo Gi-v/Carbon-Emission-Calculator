@@ -15,4 +15,4 @@ RUN DJANGO_SECRET_KEY=build-time-placeholder python manage.py collectstatic --no
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "mkdir -p /app/db && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 carbon_calculator.wsgi:application"]
+CMD ["sh", "-c", "mkdir -p /app/db && python manage.py migrate && python manage.py seed_data && gunicorn --bind 0.0.0.0:8000 --workers 3 carbon_calculator.wsgi:application"]

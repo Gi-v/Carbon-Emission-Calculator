@@ -9,7 +9,7 @@ from django.db.models import Sum, Count, Avg
 from django.contrib import messages
 from datetime import date, timedelta
 
-from .models import ActivityType, EmissionRecord , EmmisionGoal
+from .models import ActivityType, EmissionRecord, EmissionGoal
 
 
 def dashboard(request):
