@@ -7,11 +7,44 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Sum, Count, Avg
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 from datetime import date, timedelta
 
 from .models import ActivityType, EmissionRecord , EmissionGoal
 
 
+def login_view(request):
+    """Login view for user authentication."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            next_url = request.GET.get('next', '')
+            if next_url and url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(next_url)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    return render(request, 'emission_app/login.html')
+
+
+def logout_view(request):
+    """Logout view."""
+    logout(request)
+    return redirect('login')
+
+
+@login_required
 def dashboard(request):
     """Dashboard view showing summary statistics and recent activity."""
     total_emissions = EmissionRecord.objects.aggregate(
@@ -54,6 +87,7 @@ def dashboard(request):
     return render(request, 'emission_app/dashboard.html', context)
 
 
+@login_required
 def activity(request):
     """Activity view for managing activity types and adding emission records."""
     if request.method == 'POST':
@@ -110,6 +144,7 @@ def activity(request):
     return render(request, 'emission_app/activity.html', context)
 
 
+@login_required
 def history(request):
     """History view showing all emission records with filtering options."""
     records = EmissionRecord.objects.select_related('activity').order_by('-date', '-created_at')
@@ -142,6 +177,7 @@ def history(request):
     return render(request, 'emission_app/history.html', context)
 
 
+@login_required
 def delete_record(request, record_id):
     """Delete an emission record."""
     if request.method == 'POST':
@@ -150,6 +186,7 @@ def delete_record(request, record_id):
         messages.success(request, 'Record deleted successfully.')
     return redirect('history')
     
+@login_required
 def goals(request):
     """Goals view for setting and tracking emission reduction targets."""
     if request.method == 'POST':
