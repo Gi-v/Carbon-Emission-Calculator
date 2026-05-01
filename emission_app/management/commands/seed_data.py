@@ -6,7 +6,7 @@ Usage: python manage.py seed_data
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from datetime import date, timedelta
-from emission_app.models import ActivityType, EmissionRecord
+from emission_app.models import ActivityType, EmissionRecord , EmissionGoal
 
 
 class Command(BaseCommand):
