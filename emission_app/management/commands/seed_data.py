@@ -82,7 +82,25 @@ class Command(BaseCommand):
                     description=description,
                 )
                 count += 1
-
-        self.stdout.write(self.style.SUCCESS(f'✓ {count} sample emission records created'))
+        # --- 4. Create sample emission goals ---
+        if EmissionGoal.objects.exists():
+            self.stdout.write('  Emission goals already exist, skipping.')
+        else:
+            today = date.today()
+            sample_goals = [
+                ("Reduce Monthly Transport", 80.0, "monthly", today.replace(day=1), None, "Target lower car and air travel"),
+                ("Weekly Electricity Cap", 20.0, "weekly", today - timedelta(days=today.weekday()), None, "Keep home energy use in check"),
+                ("Daily Commute Goal", 5.0, "daily", today, None, "Prefer bus or train over car"),
+            ]
+            for title, target, period, start, end, notes in sample_goals:
+                EmissionGoal.objects.create(
+                    title=title,
+                    target_emission=target,
+                    period=period,
+                    start_date=start,
+                    end_date=end,
+                    notes=notes,
+                )
+        self.stdout.write(self.style.SUCCESS(f'✓ {len(sample_goals)} sample emission goals created'))
         self.stdout.write(self.style.SUCCESS('\n🎉 Database seeded successfully!'))
         self.stdout.write(self.style.SUCCESS('   Demo login → username: demo | password: demo1234'))
