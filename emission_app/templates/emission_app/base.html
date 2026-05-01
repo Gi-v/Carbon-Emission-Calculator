@@ -15,6 +15,7 @@
             height: 56px;
         }
         .navbar h1 { color: #fff; font-size: 1.2rem; flex: 1; }
+        .navbar-links { display: flex; align-items: center; gap: 4px; }
         .navbar a {
             color: #cde8d7;
             text-decoration: none;
@@ -24,6 +25,20 @@
             transition: background 0.2s;
         }
         .navbar a:hover, .navbar a.active { background: #1a5435; color: #fff; }
+        .navbar .logout-btn {
+            color: #cde8d7;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-left: 12px;
+            transition: background 0.2s;
+        }
+        .navbar .logout-btn:hover { background: #dc3545; border-color: #dc3545; color: #fff; }
+        .navbar .username { color: #cde8d7; font-size: 0.9rem; margin-left: 8px; }
         .container { max-width: 1100px; margin: 32px auto; padding: 0 16px; }
         .card {
             background: #fff;
@@ -100,10 +115,16 @@
 <body>
 <nav class="navbar">
     <h1>🌿 Carbon Emission Calculator</h1>
-    <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
-    <a href="{% url 'activity' %}" {% if request.resolver_match.url_name == 'activity' %}class="active"{% endif %}>Activity</a>
-    <a href="{% url 'history' %}" {% if request.resolver_match.url_name == 'history' %}class="active"{% endif %}>History</a>
-    <a href="{% url 'goals' %}" {% if request.resolver_match.url_name == 'goals' %}class="active"{% endif %}>Goals</a>
+    <div class="navbar-links">
+        <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="{% url 'activity' %}" {% if request.resolver_match.url_name == 'activity' %}class="active"{% endif %}>Activity</a>
+        <a href="{% url 'history' %}" {% if request.resolver_match.url_name == 'history' %}class="active"{% endif %}>History</a>
+        <a href="{% url 'goals' %}" {% if request.resolver_match.url_name == 'goals' %}class="active"{% endif %}>Goals</a>
+        {% if user.is_authenticated %}
+        <span class="username">👤 {{ user.username }}</span>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        {% endif %}
+    </div>
 </nav>
 <div class="container">
     {% for message in messages %}

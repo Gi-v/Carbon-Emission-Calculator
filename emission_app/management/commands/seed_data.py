@@ -13,16 +13,16 @@ class Command(BaseCommand):
     help = 'Seed database with sample activity types, emission records, and a demo user'
 
     def handle(self, *args, **options):
-        # --- 1. Create demo superuser (login: demo / password: demo1234) ---
-        if not User.objects.filter(username='demo').exists():
+        # --- 1. Create admin superuser (login: admin / password: admin123) ---
+        if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(
-                username='demo',
-                email='demo@example.com',
-                password='demo1234',
+                username='admin',
+                email='admin@example.com',
+                password='admin123',
             )
-            self.stdout.write(self.style.SUCCESS('✓ Created demo superuser (demo / demo1234)'))
+            self.stdout.write(self.style.SUCCESS('✓ Created admin superuser (admin / admin123)'))
         else:
-            self.stdout.write('  Demo user already exists, skipping.')
+            self.stdout.write('  Admin user already exists, skipping.')
 
         # --- 2. Create activity types (same as my-app's CLI version) ---
         activity_types = [
@@ -106,4 +106,4 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'✓ {len(sample_goals)} sample emission goals created'))
 
         self.stdout.write(self.style.SUCCESS('\n🎉 Database seeded successfully!'))
-        self.stdout.write(self.style.SUCCESS('   Demo login → username: demo | password: demo1234'))
+        self.stdout.write(self.style.SUCCESS('   Demo login → username: admin | password: admin123'))
