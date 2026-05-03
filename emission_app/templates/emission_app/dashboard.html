@@ -113,8 +113,9 @@
 
     {% if top_activities %}
     // ── Top activities doughnut ──
-    const actLabels = {{ act_labels_json|safe }};
-    const actTotals = {{ act_totals_json|safe }};
+    // We build the arrays directly using Django template loops since the JSON variables are missing in views.py
+    const actLabels = [{% for act in top_activities %}"{{ act.activity__activity_name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const actTotals = [{% for act in top_activities %}{{ act.total|stringformat:"f"|default:"0" }}{% if not forloop.last %}, {% endif %}{% endfor %}];
 
     new Chart(document.getElementById('activityDonut'), {
         type: 'doughnut',
