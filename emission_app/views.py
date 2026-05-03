@@ -77,7 +77,7 @@ def dashboard(request):
         .order_by('-total')[:5]
     )
     act_labels = [row['activity__activity_name'] for row in top_activities]
-    act_totals = [round(row['total'], 2) for row in top_activities
+    act_totals = [round(row['total'], 2) for row in top_activities]
 
     recent_records = EmissionRecord.objects.select_related('activity')\
         .order_by('-date', '-created_at')[:5]
@@ -105,6 +105,8 @@ def dashboard(request):
         'recent_records': recent_records,
         'daily_labels_json': json.dumps([d['date'] for d in daily_data]),
         'daily_totals_json': json.dumps([d['total'] for d in daily_data]),
+        'act_labels_json': json.dumps(act_labels),
+        'act_totals_json': json.dumps(act_totals),
     }
 
     return render(request, 'emission_app/dashboard.html', context)
@@ -235,6 +237,7 @@ def history(request):
         'activity_filter': activity_filter,
         'start_date': start_date,
         'end_date': end_date,
+        'chart_dates': chart_dates,
         'chart_dates_json': json.dumps(chart_dates),
         'chart_totals_json': json.dumps(chart_totals),
         'act_labels_json': json.dumps(act_labels),
@@ -339,7 +342,7 @@ def goals(request):
             'pct': pct,
             'over_target': actual > goal.target_emission,
         })
-        goal_labels = [g['goal'].title for g in goals_with_progress]
+    goal_labels = [g['goal'].title for g in goals_with_progress]
     goal_targets = [g['goal'].target_emission for g in goals_with_progress]
     goal_actuals = [g['actual'] for g in goals_with_progress]
 
