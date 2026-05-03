@@ -76,6 +76,8 @@ def dashboard(request):
         .annotate(total=Sum('emission_amount'), count=Count('id'))
         .order_by('-total')[:5]
     )
+    act_labels = [row['activity__activity_name'] for row in top_activities]
+    act_totals = [round(row['total'], 2) for row in top_activities
 
     recent_records = EmissionRecord.objects.select_related('activity')\
         .order_by('-date', '-created_at')[:5]
