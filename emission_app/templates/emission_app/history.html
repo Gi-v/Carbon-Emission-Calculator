@@ -117,10 +117,10 @@
     new Chart(document.getElementById('historyLine'), {
         type: 'line',
         data: {
-            labels: {{ chart_dates_json }},
+            labels: {{ chart_dates_json |safe }},
             datasets: [{
                 label: 'CO₂ (kg)',
-                data: {{ chart_totals_json }},
+                data: {{ chart_totals_json|safe }},
                 fill: true,
                 borderColor: '#0d9488',
                 backgroundColor: 'rgba(13,148,136,0.10)',
