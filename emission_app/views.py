@@ -337,11 +337,17 @@ def goals(request):
             'pct': pct,
             'over_target': actual > goal.target_emission,
         })
+        goal_labels = [g['goal'].title for g in goals_with_progress]
+    goal_targets = [g['goal'].target_emission for g in goals_with_progress]
+    goal_actuals = [g['actual'] for g in goals_with_progress]
 
     context = {
         'goals_with_progress': goals_with_progress,
         'today': today,
         'period_choices': EmissionGoal.PERIOD_CHOICES,
+        'goal_labels_json': json.dumps(goal_labels),
+        'goal_targets_json': json.dumps(goal_targets),
+        'goal_actuals_json': json.dumps(goal_actuals),
     }
 
     return render(request, 'emission_app/goals.html', context)
