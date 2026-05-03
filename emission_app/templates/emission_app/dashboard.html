@@ -80,8 +80,8 @@
 <script>
 (function(){
     // ── 7-day line chart ──
-    const dailyLabels  = {{ daily_labels_json }};
-    const dailyTotals  = {{ daily_totals_json }};
+    const dailyLabels  = {{ daily_labels_json|safe }};
+    const dailyTotals  = {{ daily_totals_json|safe }};
 
     new Chart(document.getElementById('dailyChart'), {
         type: 'line',
