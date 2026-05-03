@@ -7,7 +7,7 @@
         <h1>Emission History</h1>
         <p>Browse, filter, and analyse all recorded emissions</p>
     </div>
-    <span class="hero-icon">📜</span>
+    <span class="hero-icon"></span>
 </div>
 
 <div class="card">
@@ -44,13 +44,13 @@
 {% if chart_dates %}
 <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 24px;">
     <div class="card">
-        <h2>📅 Emissions Over Time</h2>
+        <h2> Emissions Over Time</h2>
         <div class="chart-wrap" style="height:240px;">
             <canvas id="historyLine"></canvas>
         </div>
     </div>
     <div class="card">
-        <h2>🥧 By Activity Type</h2>
+        <h2> By Activity Type</h2>
         <div class="chart-wrap" style="height:240px;">
             <canvas id="historyPie"></canvas>
         </div>
@@ -60,7 +60,7 @@
 
 <div class="card">
     <div class="section-header">
-        <h2>📜 Emission History</h2>
+        <h2> Emission History</h2>
         <span style="color:var(--text-muted);font-size:0.9rem;">
             Total: <strong style="color:var(--green-dark)">{{ total_filtered }} kg CO₂</strong>
             &nbsp;|&nbsp; Records: <strong style="color:var(--green-dark)">{{ records|length }}</strong>

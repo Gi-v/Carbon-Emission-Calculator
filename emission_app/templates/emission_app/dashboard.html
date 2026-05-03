@@ -22,7 +22,7 @@
         <div class="label">Total Records</div>
     </div>
     <div class="stat-card amber">
-        <span class="stat-icon">📈</span>
+        <span class="stat-icon"></span>
         <div class="value">{{ avg_emission }}</div>
         <div class="label">Avg per Record (kg CO₂)</div>
     </div>
@@ -31,7 +31,7 @@
 <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 24px;">
     <!-- 7-day line chart -->
     <div class="card">
-        <h2>📅 Emissions — Last 7 Days</h2>
+        <h2> Emissions — Last 7 Days</h2>
         <div class="chart-wrap" style="height:260px;">
             <canvas id="dailyChart"></canvas>
         </div>
@@ -39,7 +39,7 @@
 
     <!-- Top activities doughnut -->
     <div class="card">
-        <h2>🏭 Top Activities</h2>
+        <h2> Top Activities</h2>
         {% if top_activities %}
         <div class="chart-wrap" style="height:260px;">
             <canvas id="activityDonut"></canvas>
@@ -52,7 +52,7 @@
 
 <div class="card">
     <div class="section-header">
-        <h2>🕐 Recent Emission Records</h2>
+        <h2>Recent Emission Records</h2>
         <a href="{% url 'history' %}" class="btn btn-primary">View All History</a>
     </div>
     {% if recent_records %}

@@ -7,7 +7,7 @@
         <h1>Activity Tracker</h1>
         <p>Log emission records and manage activity types</p>
     </div>
-    <span class="hero-icon">⚡</span>
+    <span class="hero-icon"></span>
 </div>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -44,7 +44,7 @@
     </div>
 
     <div class="card">
-        <h2>🏭 Add New Activity Type</h2>
+        <h2> Add New Activity Type</h2>
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_activity">

@@ -7,7 +7,7 @@
         <h1>Emission Goals</h1>
         <p>Set targets and track your progress this period</p>
     </div>
-    <span class="hero-icon">🎯</span>
+    <span class="hero-icon"></span>
 </div>
 
 <!-- Add Goal Form -->
@@ -50,7 +50,7 @@
                 <input type="text" id="notes" name="notes" placeholder="Optional notes">
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">🎯 Add Goal</button>
+        <button type="submit" class="btn btn-primary"> Add Goal</button>
     </form>
 </div>
 
@@ -64,7 +64,7 @@
 </div>
 
 <div class="card">
-    <h2>🏆 Your Goals</h2>
+    <h2> Your Goals</h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
         {% for item in goals_with_progress %}
         {% with item.goal as goal %}
