@@ -103,6 +103,7 @@ def dashboard(request):
         'avg_emission': round(avg_emission, 2),
         'top_activities': top_activities,
         'recent_records': recent_records,
+        'daily_data': daily_data,
         'daily_labels_json': json.dumps([d['date'] for d in daily_data]),
         'daily_totals_json': json.dumps([d['total'] for d in daily_data]),
         'act_labels_json': json.dumps(act_labels),
