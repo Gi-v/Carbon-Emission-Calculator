@@ -1,62 +1,43 @@
-# 🌿 Carbon Emission Calculator
+# Carbon Emission Calculator
 
-A web-based application built with **Django** that helps users track and manage their carbon emissions from daily activities. The project uses **SQLite** as its database management system to store activity types and emission records.
+## Motivation and Background
+As environmental sustainability becomes a critical global priority, there is a pressing need for accessible tools that accurately quantify carbon emissions. This project was developed to provide an interpretable, data-driven approach to tracking and managing environmental impact. By utilizing custom emission factors and robust data modeling, the platform bridges the gap between complex emission quantification methods and everyday user activities. The ultimate goal is to empower users to make informed decisions, understand the environmental cost of their actions, and actively reduce their carbon footprint through manageable goals.
 
-## 📌 About
+## Overview
+The Carbon Emission Calculator is a comprehensive web-based tracking system designed to securely log daily activities, calculate associated greenhouse gas emissions, and actively monitor reduction targets. Built with a focus on delivering a highly interpretable reporting interface, this platform allows individuals or organizations to seamlessly integrate sustainability tracking into their routines.
 
-This project allows users to:
-- Log carbon-emitting activities (e.g., car travel, electricity usage)
-- Automatically calculate CO₂ emissions based on predefined emission factors
-- View a dashboard with summary statistics and a 7-day emission chart
-- Browse and manage emission history
-- Add custom activity types with their own emission factors
+## Key Features
+* **Activity Catalog:** Log various emission-generating activities using a robust catalog configured with custom emission factors for precise calculations.
+* **Interpretable Reporting:** A centralized dashboard providing a clear, high-level overview of total emissions, recent activities, and progress against environmental targets.
+* **Goal Management:** Establish, track, and achieve customized emission reduction goals.
+* **Historical Tracking:** Detailed logs and history views to analyze emission trends and data models over time.
+* **Secure Authentication:** User account management and a secure login system to keep record management private.
 
-## 🛠️ Tech Stack
+## Technology Stack
+* **Backend:** Python 3, Django 4.2
+* **Database:** SQLite (optimized for core data modeling and record management)
+* **Frontend:** HTML5, CSS3, Django Templates
+* **Containerization:** Docker, Docker Compose
+* **Continuous Integration:** GitHub Actions
 
-| Component | Technology |
-|-----------|------------|
-| Backend | Python, Django 4.2 |
-| Database (DBMS) | SQLite3 |
-| Frontend | HTML, Django Templates |
-| Server | Gunicorn, Whitenoise |
+## Project Structure
+* `carbon_calculator/`: Main Django project configuration, including settings and core URL routing.
+* `emission_app/`: The primary application module containing data models, views, and frontend templates.
+* `carbon_emissions_schema.sql`: Base SQL schema definitions.
+* `Dockerfile` & `docker-compose.yml`: Configuration files for containerized deployment.
+* `.github/workflows/ci.yml`: Continuous integration pipeline configurations.
 
-## 🗄️ Database Schema
+## Installation and Setup
 
-### ActivityType
-| Field | Type | Description |
-|-------|------|-------------|
-| activity_name | CharField | Name of the activity (unique) |
-| emission_factor | FloatField | kg CO₂ emitted per unit |
-| unit | CharField | Unit of measurement (e.g., km, kWh) |
+### Prerequisites
+* Python 3.10+
+* pip (Python package installer)
+* Docker and Docker Compose (for containerized setup)
 
-### EmissionRecord
-| Field | Type | Description |
-|-------|------|-------------|
-| activity | ForeignKey | Links to an ActivityType |
-| quantity | FloatField | Amount of activity performed |
-| emission_amount | FloatField | Calculated CO₂ in kg (auto-computed) |
-| date | DateField | Date of the activity |
-| description | TextField | Optional notes |
-| created_at | DateTimeField | Timestamp of record creation |
-
-
-## 📄 Pages
-
-| Page | URL | Description |
-|------|-----|-------------|
-| Dashboard | `/` | Overview with stats, top activities, and 7-day chart |
-| Activity | `/activity/` | Add new emission records and activity types |
-| History | `/history/` | View and delete past emission records |
-
-## 📦 Dependencies
-
-- Django 4.2.9
-- python-decouple
-- gunicorn
-- whitenoise
-- matplotlib
-- pandas
-
-## 📝 License
-
-This project is licensed under the terms included in the [LICENSE](LICENSE) file.
+### Option 1: Local Development Setup
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd Carbon-Emission-Calculator
+  
+   
