@@ -3,10 +3,12 @@
 ## Motivation and Background
 As environmental sustainability becomes a critical global priority, there is a pressing need for accessible tools that accurately quantify carbon emissions. This project was developed to provide an interpretable, data-driven approach to tracking and managing environmental impact. By utilizing custom emission factors and robust data modeling, the platform bridges the gap between complex emission quantification methods and everyday user activities. The ultimate goal is to empower users to make informed decisions, understand the environmental cost of their actions, and actively reduce their carbon footprint through manageable goals.
 
+
 ## Overview
 The Carbon Emission Calculator is a comprehensive web-based tracking system designed to securely log daily activities, calculate associated greenhouse gas emissions, and actively monitor reduction targets. Built with a focus on delivering a highly interpretable reporting interface, this platform allows individuals or organizations to seamlessly integrate sustainability tracking into their routines.
 
 ## Key Features
+
 * **Activity Catalog:** Log various emission-generating activities using a robust catalog configured with custom emission factors for precise calculations.
 * **Interpretable Reporting:** A centralized dashboard providing a clear, high-level overview of total emissions, recent activities, and progress against environmental targets.
 * **Goal Management:** Establish, track, and achieve customized emission reduction goals.
