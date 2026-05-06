@@ -35,9 +35,54 @@ The Carbon Emission Calculator is a comprehensive web-based tracking system desi
 * Docker and Docker Compose (for containerized setup)
 
 ### Option 1: Local Development Setup
+
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
    cd Carbon-Emission-Calculator
-  
+   ```
+2. **Create and activate a virtual environment:
+   ```bash
+   # On macOS/Linux
+   python3 -m venv venv
+   source venv/bin/activate
    
+
+   # On Windows
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Apply database migrations:
+    ```bash
+   python manage.py migrate
+   ```
+5. Create a superuser (for admin panel access):
+```bash
+   python manage.py createsuperuser
+   python manage.py runserver
+   ```
+6.  The application will be available at http://127.0.0.1:8000/
+## Option 2: Containerized Setup (Docker)
+   
+git clone <repository-url>
+cd Carbon-Emission-Calculator
+Build and spin up the containers:
+docker-compose up --build
+Apply database migrations (run in a separate terminal):
+docker-compose exec web python manage.py migrate
+Create a superuser (optional):
+docker-compose exec web python manage.py createsuperuser
+The application will be available at http://localhost:8000/
+
+Usage
+Register/Login: Create a new user account or log in with your credentials.
+Dashboard: View your high-level emission summary and track progress against active goals.
+Log Activity: Navigate to the activity catalog, select an action (e.g., transportation, energy usage), input your metrics, and let the system calculate the footprint.
+History & Goals: Review past entries in the history tab and set new emission reduction targets to lower your environmental impact over time.
+
+License
+This project is licensed under the Apache 2.0 License - see the LICENSE file for details.
