@@ -17,13 +17,12 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .models import ActivityType, EmissionRecord, EmissionGoal
 
 
-# =========================
-# AUTH VIEWS (UNCHANGED)
-# =========================
-
+# AUTH VIEWS
 def login_view(request):
+    """Authenticates a user and redirects to the intended page or dashboard."""
+
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('dashboard')  # Prevents authenticated users from seeing the login form again
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -35,6 +34,7 @@ def login_view(request):
             login(request, user)
 
             next_url = request.GET.get('next', '')
+            # Validate `next` before redirecting — open redirect vulnerability if skipped
             if next_url and url_has_allowed_host_and_scheme(
                 url=next_url,
                 allowed_hosts={request.get_host()},
@@ -45,21 +45,23 @@ def login_view(request):
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
+            # Intentionally vague error — avoids confirming whether the username exists
 
     return render(request, 'emission_app/login.html')
 
 
 def logout_view(request):
+    """Clears the session and redirects to the login page."""
     logout(request)
     return redirect('login')
 
 
-# =========================
 # DASHBOARD
-# =========================
-
 @login_required
 def dashboard(request):
+    """Computes and renders emission summary stats and chart data for the dashboard."""
+
+    # `or 0.0` guards against None when no records exist yet (aggregate returns None on empty sets)
     total_emissions = EmissionRecord.objects.aggregate(
         total=Sum('emission_amount')
     )['total'] or 0.0
@@ -70,6 +72,7 @@ def dashboard(request):
         avg=Avg('emission_amount')
     )['avg'] or 0.0
 
+    # Limit to top 5 so the chart stays readable without crowding the legend
     top_activities = (
         EmissionRecord.objects
         .values('activity__activity_name')
@@ -79,10 +82,12 @@ def dashboard(request):
     act_labels = [row['activity__activity_name'] for row in top_activities]
     act_totals = [round(row['total'], 2) for row in top_activities]
 
-    recent_records = EmissionRecord.objects.select_related('activity')\
+    # `select_related` avoids N+1 queries when accessing activity name in the template
+    recent_records = EmissionRecord.objects.select_related('activity') \
         .order_by('-date', '-created_at')[:5]
 
-    # 7-day chart
+    # Build per-day totals for the last 7 days; fills 0.0 for days with no records
+    # so the chart always renders a complete 7-point line without gaps
     today = date.today()
     daily_data = []
 
@@ -97,6 +102,7 @@ def dashboard(request):
             'total': round(total, 2)
         })
 
+    # Chart.js requires JSON arrays, so serialise here rather than in the template
     context = {
         'total_emissions': round(total_emissions, 2),
         'total_records': total_records,
@@ -113,13 +119,14 @@ def dashboard(request):
     return render(request, 'emission_app/dashboard.html', context)
 
 
-# =========================
-# ACTIVITY
-# =========================
 
+# ACTIVITY
 @login_required
 def activity(request):
+    """Handles two POST actions on one view: logging a record and adding an activity type."""
+
     if request.method == 'POST':
+        # Single endpoint handles both forms; `action` field distinguishes which was submitted
         action = request.POST.get('action')
 
         if action == 'add_record':
@@ -133,12 +140,13 @@ def activity(request):
                 qty = float(quantity)
 
                 if qty <= 0:
-                    raise ValueError("Quantity must be positive")
+                    raise ValueError("Quantity must be positive")  # Negative CO2 is physically meaningless
 
+                # `emission_amount` is intentionally omitted — EmissionRecord.save() auto-calculates it
                 EmissionRecord.objects.create(
                     activity=activity_type,
                     quantity=qty,
-                    date=record_date or date.today(),
+                    date=record_date or date.today(),  # Falls back to today if the user left the field empty
                     description=description,
                 )
 
@@ -147,7 +155,7 @@ def activity(request):
             except (ValueError, TypeError) as e:
                 messages.error(request, f'Invalid input: {e}')
 
-            return redirect('activity')
+            return redirect('activity')  # PRG pattern — prevents duplicate submissions on browser refresh
 
         elif action == 'add_activity':
             name = request.POST.get('activity_name', '').strip()
@@ -155,6 +163,7 @@ def activity(request):
             unit = request.POST.get('unit', '').strip()
 
             try:
+                # Both are required — an activity without a name or unit can't be meaningfully logged
                 if not name or not unit:
                     raise ValueError("Name and unit are required")
 
@@ -169,8 +178,9 @@ def activity(request):
             except (ValueError, TypeError) as e:
                 messages.error(request, f'Invalid input: {e}')
 
-            return redirect('activity')
+            return redirect('activity')  # PRG pattern — same reason as above
 
+    # Annotate with usage stats so the catalog table can show record counts without extra queries
     activity_types = ActivityType.objects.annotate(
         record_count=Count('emissionrecord'),
         total_emissions=Sum('emissionrecord__emission_amount'),
@@ -178,19 +188,22 @@ def activity(request):
 
     context = {
         'activity_types': activity_types,
-        'today': date.today(),
+        'today': date.today(),  # Passed so the date input defaults to today in the template
     }
 
     return render(request, 'emission_app/activity.html', context)
 
 
-# =========================
+
 # HISTORY
-# =========================
+ 
 
 @login_required
 def history(request):
-    records = EmissionRecord.objects.select_related('activity')\
+    """Returns emission history with optional filters; builds chart data from the filtered set."""
+
+    # Start with all records; filters are applied progressively below
+    records = EmissionRecord.objects.select_related('activity') \
         .order_by('-date', '-created_at')
 
     activity_filter = request.GET.get('activity')
@@ -200,32 +213,34 @@ def history(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
+    # Both filters are optional and independent — applied only when the param is non-empty
     if start_date:
         records = records.filter(date__gte=start_date)
     if end_date:
         records = records.filter(date__lte=end_date)
 
+    # Compute total after filtering so the summary reflects exactly what's on screen
     total_filtered = records.aggregate(
         total=Sum('emission_amount')
     )['total'] or 0.0
 
     activity_types = ActivityType.objects.order_by('activity_name')
 
-    # Daily chart
+    # Group by day so the trend chart shows one bar per date, not one per record
     daily_agg = (
         records.values('date')
         .annotate(total=Sum('emission_amount'))
-        .order_by('date')
+        .order_by('date')  # Ascending — chart reads left-to-right chronologically
     )
 
     chart_dates = [str(row['date']) for row in daily_agg]
     chart_totals = [round(row['total'], 2) for row in daily_agg]
 
-    # Activity breakdown
+    # Separate breakdown by activity type for the donut chart
     by_activity = (
         records.values('activity__activity_name')
         .annotate(total=Sum('emission_amount'))
-        .order_by('-total')
+        .order_by('-total')  # Highest emitting activities appear first in the legend
     )
 
     act_labels = [row['activity__activity_name'] for row in by_activity]
@@ -248,26 +263,26 @@ def history(request):
     return render(request, 'emission_app/history.html', context)
 
 
-# =========================
 # DELETE RECORD
-# =========================
 
 @login_required
 def delete_record(request, record_id):
+    """Deletes a single emission record. POST-only to block accidental deletions via GET."""
     if request.method == 'POST':
         record = get_object_or_404(EmissionRecord, pk=record_id)
         record.delete()
         messages.success(request, 'Record deleted successfully.')
 
+    # Always redirect — GET requests silently fall through without deleting anything
     return redirect('history')
 
 
-# =========================
-# GOALS
-# =========================
 
+# GOALS
 @login_required
 def goals(request):
+    """Manages goals and computes live progress by summing records within each goal's period window."""
+
     if request.method == 'POST':
         action = request.POST.get('action')
 
@@ -276,7 +291,7 @@ def goals(request):
             target = request.POST.get('target_emission')
             period = request.POST.get('period', 'monthly')
             start_date = request.POST.get('start_date')
-            end_date = request.POST.get('end_date') or None
+            end_date = request.POST.get('end_date') or None  # Empty string → None so the DB stores NULL, not ""
             notes = request.POST.get('notes', '').strip()
 
             try:
@@ -313,16 +328,18 @@ def goals(request):
     goals_with_progress = []
 
     for goal in all_goals:
+        # Determine the date range to query based on the goal's recurrence period
         if goal.period == 'daily':
-            start = end = today
+            start = end = today  # Daily goals only count today's records
         elif goal.period == 'weekly':
-            start = today - timedelta(days=today.weekday())
-            end = start + timedelta(days=6)
+            start = today - timedelta(days=today.weekday())  # Monday of the current week
+            end = start + timedelta(days=6)                  # Sunday of the current week
         else:
-            start = today.replace(day=1)
+            start = today.replace(day=1)  # First day of the current month
             if today.month == 12:
                 end = today.replace(month=12, day=31)
             else:
+                # First day of next month minus one day — handles variable month lengths
                 end = today.replace(month=today.month + 1, day=1) - timedelta(days=1)
 
         actual = EmissionRecord.objects.filter(
@@ -332,17 +349,20 @@ def goals(request):
 
         actual = round(actual, 2)
 
+        # Cap at 200% so a severely exceeded goal doesn't break the progress bar layout
         pct = min(
             round((actual / goal.target_emission) * 100, 1),
             200
-        ) if goal.target_emission else 0
+        ) if goal.target_emission else 0  # Guard against division by zero if target is 0
 
         goals_with_progress.append({
             'goal': goal,
             'actual': actual,
             'pct': pct,
-            'over_target': actual > goal.target_emission,
+            'over_target': actual > goal.target_emission,  # Drives the red/green indicator in the template
         })
+
+    # Extract parallel arrays for the target-vs-actual comparison chart
     goal_labels = [g['goal'].title for g in goals_with_progress]
     goal_targets = [g['goal'].target_emission for g in goals_with_progress]
     goal_actuals = [g['actual'] for g in goals_with_progress]
