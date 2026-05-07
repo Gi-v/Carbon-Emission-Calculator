@@ -1,15 +1,10 @@
--- =============================================================================
--- CARBON EMISSIONS TRACKER DATABASE
--- =============================================================================
--- Database : carbon_emissions.db
--- Purpose  : DBMS Project (Clean & Readable Version)
--- =============================================================================
+
 
 PRAGMA foreign_keys = ON;
 
--- =============================================================================
+
 -- SECTION 1 — CLEAN SETUP
--- =============================================================================
+
 
 DROP VIEW  IF EXISTS v_goal_vs_actual;
 DROP VIEW  IF EXISTS v_monthly_summary;
@@ -19,13 +14,9 @@ DROP TABLE IF EXISTS emission_app_emissionrecord;
 DROP TABLE IF EXISTS emission_app_emissiongoal;
 DROP TABLE IF EXISTS emission_app_activitytype;
 
--- =============================================================================
 -- SECTION 2 — TABLES
--- =============================================================================
 
--- -----------------------------------------------------------------------------
 -- Activity Types
--- -----------------------------------------------------------------------------
 CREATE TABLE emission_app_activitytype (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_name   VARCHAR(100) NOT NULL UNIQUE,
@@ -33,9 +24,8 @@ CREATE TABLE emission_app_activitytype (
     unit            VARCHAR(20)  NOT NULL
 );
 
--- -----------------------------------------------------------------------------
+
 -- Emission Records
--- -----------------------------------------------------------------------------
 CREATE TABLE emission_app_emissionrecord (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_id     INTEGER NOT NULL,
@@ -52,9 +42,7 @@ CREATE TABLE emission_app_emissionrecord (
 CREATE INDEX idx_record_activity ON emission_app_emissionrecord(activity_id);
 CREATE INDEX idx_record_date     ON emission_app_emissionrecord(date);
 
--- -----------------------------------------------------------------------------
 -- Emission Goals
--- -----------------------------------------------------------------------------
 CREATE TABLE emission_app_emissiongoal (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     title            VARCHAR(100) NOT NULL,
@@ -65,10 +53,7 @@ CREATE TABLE emission_app_emissiongoal (
     notes            TEXT         DEFAULT '',
     created_at       DATETIME     NOT NULL
 );
-
--- =============================================================================
--- SECTION 3 — SAMPLE DATA
--- =============================================================================
+-- SECTION 3 — SAMPLE DAT
 
 -- Activity Types
 INSERT INTO emission_app_activitytype
@@ -168,6 +153,136 @@ SELECT
     ) AS actual_kg
 FROM emission_app_emissiongoal g;
 
--- =============================================================================
--- END OF FILE
--- =============================================================================
+
+-- ----------------------------------------------------------------------------
+-- 1) List all activity types (catalog)
+-- ----------------------------------------------------------------------------
+-- SELECT id, activity_name, emission_factor, unit
+-- FROM emission_app_activitytype
+-- ORDER BY activity_name;
+
+-- ----------------------------------------------------------------------------
+-- 2) Latest 10 emission records + activity name (JOIN)
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   r.id,
+--   a.activity_name,
+--   r.quantity,
+--   r.emission_amount,
+--   r.date,
+--   r.description,
+--   r.created_at
+-- FROM emission_app_emissionrecord r
+-- JOIN emission_app_activitytype a ON a.id = r.activity_id
+-- ORDER BY r.date DESC, r.created_at DESC
+-- LIMIT 10;
+
+-- ----------------------------------------------------------------------------
+-- 3) Total emissions overall
+-- ----------------------------------------------------------------------------
+-- SELECT ROUND(SUM(emission_amount), 2) AS total_emissions_kg
+-- FROM emission_app_emissionrecord;
+
+-- ----------------------------------------------------------------------------
+-- 4) Total emissions per activity (includes activities with 0 records)
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   a.id,
+--   a.activity_name,
+--   a.unit,
+--   COUNT(r.id) AS record_count,
+--   ROUND(COALESCE(SUM(r.quantity), 0), 2) AS total_quantity,
+--   ROUND(COALESCE(SUM(r.emission_amount), 0), 2) AS total_emissions_kg
+-- FROM emission_app_activitytype a
+-- LEFT JOIN emission_app_emissionrecord r ON r.activity_id = a.id
+-- GROUP BY a.id, a.activity_name, a.unit
+-- ORDER BY total_emissions_kg DESC, a.activity_name ASC;
+
+-- ----------------------------------------------------------------------------
+-- 5) Top 5 activities by total emissions
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   a.activity_name,
+--   ROUND(SUM(r.emission_amount), 2) AS total_emissions_kg
+-- FROM emission_app_emissionrecord r
+-- JOIN emission_app_activitytype a ON a.id = r.activity_id
+-- GROUP BY a.activity_name
+-- ORDER BY total_emissions_kg DESC
+-- LIMIT 5;
+
+-- ----------------------------------------------------------------------------
+-- 6) Emissions for the last 7 days (SQLite "now" based)
+--    If your sample data is old, consider query #7 with fixed dates.
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   date,
+--   ROUND(SUM(emission_amount), 2) AS total_kg
+-- FROM emission_app_emissionrecord
+-- WHERE date >= DATE('now', '-6 days')
+-- GROUP BY date
+-- ORDER BY date;
+
+-- ----------------------------------------------------------------------------
+-- 7) Emissions in a fixed demo date range (matches sample data in schema.sql)
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   r.date,
+--   ROUND(SUM(r.emission_amount), 2) AS total_kg
+-- FROM emission_app_emissionrecord r
+-- WHERE r.date BETWEEN '2026-02-22' AND '2026-02-28'
+-- GROUP BY r.date
+-- ORDER BY r.date;
+
+-- ----------------------------------------------------------------------------
+-- 8) History-style filter: show records for a specific activity_id
+--    Example: activity_id = 1 (Car Travel in sample data)
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   r.id,
+--   a.activity_name,
+--   r.quantity,
+--   r.emission_amount,
+--   r.date,
+--   r.description
+-- FROM emission_app_emissionrecord r
+-- JOIN emission_app_activitytype a ON a.id = r.activity_id
+-- WHERE r.activity_id = 1
+-- ORDER BY r.date DESC, r.created_at DESC;
+
+-- ----------------------------------------------------------------------------
+-- 9) Monthly summary (VIEW)
+-- ----------------------------------------------------------------------------
+-- SELECT *
+-- FROM v_monthly_summary;
+
+-- ----------------------------------------------------------------------------
+-- 10) Goal vs Actual report (VIEW) + % of target
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   title,
+--   period,
+--   target_kg,
+--   actual_kg,
+--   ROUND(CASE WHEN target_kg = 0 THEN 0 ELSE (actual_kg / target_kg) * 100 END, 1) AS pct_of_target
+-- FROM v_goal_vs_actual
+-- ORDER BY pct_of_target DESC;
+
+-- ----------------------------------------------------------------------------
+-- 11) Only goals that are over target
+-- ----------------------------------------------------------------------------
+-- SELECT
+--   title,
+--   period,
+--   target_kg,
+--   actual_kg,
+--   ROUND(actual_kg - target_kg, 2) AS over_by_kg
+-- FROM v_goal_vs_actual
+-- WHERE actual_kg > target_kg
+-- ORDER BY over_by_kg DESC;
+
+-- ----------------------------------------------------------------------------
+-- 12) "What would be deleted?" (safe preview)
+-- ----------------------------------------------------------------------------
+-- SELECT *
+-- FROM emission_app_emissionrecord
+-- WHERE id = 12;
