@@ -1,6 +1,6 @@
 #  Carbon Emission Calculator
 
-[![CI](https://github.com/your-username/Carbon-Emission-Calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/Carbon-Emission-Calculator/actions)
+[![CI](https://github.com/Gi-v/Carbon-Emission-Calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/Gi-v/Carbon-Emission-Calculator/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Django 4.2](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
